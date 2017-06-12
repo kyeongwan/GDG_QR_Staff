@@ -3,13 +3,16 @@ package com.firebaseapp.gdg_korea_campus.staff.view.presenter
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.support.v7.app.AlertDialog
 import android.util.Log
+import android.widget.EditText
 import android.widget.Toast
 import com.firebaseapp.gdg_korea_campus.staff.adapter.EventAdapterContract
 import com.firebaseapp.gdg_korea_campus.staff.data.EventData
 import com.firebaseapp.gdg_korea_campus.staff.data.source.EventDataSource
 import com.firebaseapp.gdg_korea_campus.staff.data.source.EventRepository
-import com.firebaseapp.gdg_korea_campus.staff.view.MainActivity
+import com.firebaseapp.gdg_korea_campus.staff.data.source.PreferenceRepository
+import com.firebaseapp.gdg_korea_campus.staff.view.CheckActivity
 import org.json.JSONObject
 
 /**
@@ -20,6 +23,7 @@ class MainPresenter : MainContract.Presenter {
 
     lateinit override var view: MainContract.View
     lateinit override var eventData: EventRepository
+    lateinit override var preferenceData: PreferenceRepository
 
     lateinit override var adapterModel: EventAdapterContract.Model
     override var adapterView: EventAdapterContract.View? = null
@@ -52,7 +56,7 @@ class MainPresenter : MainContract.Presenter {
                 if(result.getString("result").equals("Fail")){
                     Toast.makeText(context, "비밀키가 다릅니다.", 1000).show()
                 }else {
-                    val intent = Intent(context, MainActivity::class.java)
+                    val intent = Intent(context, CheckActivity::class.java)
                     intent.putExtra("url", result.getString("result"))
                     context.startActivity(intent)
                 }
@@ -62,7 +66,29 @@ class MainPresenter : MainContract.Presenter {
 
     private fun onClickListener(position: Int) {
         adapterModel.getItem(position).let {
-            view.showDialog(it._id)
+            view.showSecuritKeyDialog(it._id)
         }
+    }
+
+    override fun showAPIKeySetDialog(context: Context) {
+        val ad = AlertDialog.Builder(context)
+        ad.setTitle("Meetup API Key 입력")
+
+        val et = EditText(context)
+        et.setText(preferenceData.getAPIKey())
+
+        ad.setView(et)
+
+        ad.setPositiveButton("확인") { dialog, which ->
+            val value = et.text.toString()
+            Log.e("value", value + "")
+            preferenceData.setAPIKey(value)
+            dialog.dismiss()
+        }
+
+        ad.setNegativeButton("취소") { dialog, which ->
+            dialog.dismiss()
+        }
+        ad.show()
     }
 }

@@ -8,5 +8,4 @@ object Global{
 
     val EVENTLIST_DB_URL = ""
 
-
 }

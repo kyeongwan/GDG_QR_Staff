@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">GDG Staff</string>
+    <string name="action_settings">API 설정</string>
 </resources>
