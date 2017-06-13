@@ -1,11 +1,9 @@
 package com.firebaseapp.gdg_korea_campus.staff.adapter
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.LinearLayout
 import android.widget.TextView
 import com.firebaseapp.gdg_korea_campus.staff.R
 import com.firebaseapp.gdg_korea_campus.staff.data.EventData
