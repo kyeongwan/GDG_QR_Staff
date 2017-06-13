@@ -12,6 +12,7 @@ import com.firebaseapp.gdg_korea_campus.staff.data.source.PreferenceRepository
 interface MainContract {
 
     interface View {
+        fun showBlankDBKey()
         fun showSecuritKeyDialog(_id: String)
     }
 

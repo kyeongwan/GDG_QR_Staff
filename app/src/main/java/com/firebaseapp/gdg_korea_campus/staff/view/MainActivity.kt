@@ -1,15 +1,11 @@
 package com.firebaseapp.gdg_korea_campus.staff.view
 
-import android.content.Context
-import android.content.SharedPreferences
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.ListView
 import android.widget.Toast
 import com.firebaseapp.gdg_korea_campus.staff.adapter.EventListAdapter
 import com.firebaseapp.gdg_korea_campus.staff.data.source.EventRepository
@@ -19,6 +15,8 @@ import com.firebaseapp.gdg_korea_campus.staff.view.presenter.MainPresenter
 import android.widget.EditText
 import com.firebaseapp.gdg_korea_campus.staff.R
 import com.firebaseapp.gdg_korea_campus.staff.data.source.PreferenceRepository
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
 
 /**
  * Created by lk on 2017. 4. 27..
@@ -26,18 +24,15 @@ import com.firebaseapp.gdg_korea_campus.staff.data.source.PreferenceRepository
 class MainActivity : AppCompatActivity(), MainContract.View {
 
     private lateinit var presenter: MainPresenter
-    private lateinit var toolbar: Toolbar
     lateinit var eventListAdapter: EventListAdapter
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        toolbar = (findViewById(R.id.toolbar) as Toolbar)
         setSupportActionBar(toolbar)
 
         eventListAdapter = EventListAdapter()
-        (findViewById(R.id.lv_main_eventlist) as ListView).adapter = eventListAdapter
+        lv_main_eventlist.adapter = eventListAdapter
 
         val preferences = getSharedPreferences("pref", MODE_PRIVATE)
 
@@ -60,12 +55,20 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         val id = item?.itemId
-        if(id == R.id.action_settings){
+        if (id == R.id.action_settings) {
             presenter.showAPIKeySetDialog(this@MainActivity)
             return true
         }
         return super.onOptionsItemSelected(item)
 
+    }
+
+    override fun showBlankDBKey() {
+        AlertDialog.Builder(this)
+                .setMessage("필수 정보 미입력. 앱을 다시 만드세요")
+                .setPositiveButton(android.R.string.ok, null)
+                .setOnDismissListener { finish() }
+                .show()
     }
 
     override fun showSecuritKeyDialog(_id: String) {
@@ -76,14 +79,14 @@ class MainActivity : AppCompatActivity(), MainContract.View {
         val et = EditText(this@MainActivity)
         ad.setView(et)
 
-        ad.setPositiveButton("확인") { dialog, which ->
+        ad.setPositiveButton("확인") { dialog, _ ->
             val value = et.text.toString()
             Log.e("value", value + "")
-            presenter.loadOpenKey(this@MainActivity,_id,value)
+            presenter.loadOpenKey(this@MainActivity, _id, value)
             dialog.dismiss()
         }
 
-        ad.setNegativeButton("취소") { dialog, which ->
+        ad.setNegativeButton("취소") { dialog, _ ->
             dialog.dismiss()
         }
         ad.show()
