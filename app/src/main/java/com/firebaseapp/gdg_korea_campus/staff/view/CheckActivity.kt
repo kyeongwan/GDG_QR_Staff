@@ -13,6 +13,7 @@ import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import com.firebaseapp.gdg_korea_campus.staff.R
+
 import com.google.zxing.integration.android.IntentIntegrator
 
 import org.json.JSONException
@@ -28,7 +29,7 @@ import java.lang.Integer.parseInt
 class CheckActivity : AppCompatActivity() {
 
     lateinit var url: String
-    lateinit var mProgressDialog: ProgressDialog
+    lateinit var mProgressDialog : ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +47,7 @@ class CheckActivity : AppCompatActivity() {
                 }
             }
         } else {
-            IntentIntegrator(this).initiateScan()
+            IntentIntegrator.initiateScan(this)
         }
 
 
@@ -59,13 +60,13 @@ class CheckActivity : AppCompatActivity() {
                 Log.d("CheckActivity", "Cancelled scan")
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
             } else {
-                Log.d("CheckActivity", result.contents)
+                Log.d("CheckActivity", "${result.contents}")
 
                 val data = decrypt(result.contents, "gdgkrcampus")
                 val d = data.split("/")
                 val thread = NetworkThread(d[0], d[1])
                 thread.start()
-                mProgressDialog = ProgressDialog.show(this@CheckActivity, "", "잠시만 기다려 주세요.", true)
+                mProgressDialog = ProgressDialog.show(this@CheckActivity,"", "잠시만 기다려 주세요.",true)
 
             }
         } else {
@@ -75,12 +76,12 @@ class CheckActivity : AppCompatActivity() {
         }
     }
 
-    fun decrypt(data: String, key: String): String {
+    fun decrypt(data: String, key: String) : String{
         val result = Base64.decode(data, 0)
         var results = ""
-        for (i in result.indices) {
-            val c = result[i].toInt().let { if (it < 0) it + 256 else it }
-            val keychar = key[(i % key.length - 1).let { if (it == -1) key.length - 1 else it }].toInt()
+        for(i in result.indices){
+            val c = result[i].toInt().let { if(it < 0) it+256 else it }
+            val keychar = key[ (i%key.length -1).let { if (it == -1) key.length-1 else it } ].toInt()
             results += (c - keychar).toChar()
         }
         return results
@@ -115,17 +116,17 @@ class CheckActivity : AppCompatActivity() {
                     mProgressDialog.dismiss()
                     if (responseString == "{\"result\":\"success\"}") {
                         val alert = AlertDialog.Builder(this@CheckActivity)
-                        alert.setPositiveButton("OK") { dialog, _ ->
-                            dialog.dismiss()
+                        alert.setPositiveButton("OK"){ dialog, which ->
+                             dialog.dismiss()
                         }
                         alert.setMessage("확인 되었습니다")
                         alert.setOnDismissListener {
-                            IntentIntegrator(this@CheckActivity).initiateScan()
+                            IntentIntegrator.initiateScan(this@CheckActivity)
                         }
                         alert.show()
                     } else {
                         val alert = AlertDialog.Builder(this@CheckActivity)
-                        alert.setPositiveButton("OK") { dialog, which ->
+                        alert.setPositiveButton("OK"){ dialog, which ->
                             dialog.dismiss()
                         }
                         alert.setMessage("확인되지 않은 사용자입니다.")

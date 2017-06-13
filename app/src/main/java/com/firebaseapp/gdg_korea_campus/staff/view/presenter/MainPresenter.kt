@@ -3,13 +3,10 @@ package com.firebaseapp.gdg_korea_campus.staff.view.presenter
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
-import android.provider.Settings
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.widget.EditText
-import android.widget.GridLayout
 import android.widget.Toast
-import com.firebaseapp.gdg_korea_campus.staff.Global
 import com.firebaseapp.gdg_korea_campus.staff.adapter.EventAdapterContract
 import com.firebaseapp.gdg_korea_campus.staff.data.EventData
 import com.firebaseapp.gdg_korea_campus.staff.data.source.EventDataSource
@@ -36,11 +33,6 @@ class MainPresenter : MainContract.Presenter {
         }
 
     override fun loadItems(context: Context, isClear: Boolean) {
-        if (Global.EVENTLIST_DB_URL.isBlank()) {
-            view.showBlankDBKey()
-            return
-        }
-
         val mProgressDialog = ProgressDialog.show(context,"", "잠시만 기다려 주세요.",true)
         eventData.getEvents(context, 10, object : EventDataSource.LoadEventCallback {
             override fun onLoadEvents(list: ArrayList<EventData>) {
@@ -87,14 +79,14 @@ class MainPresenter : MainContract.Presenter {
 
         ad.setView(et)
 
-        ad.setPositiveButton("확인") { dialog, _ ->
+        ad.setPositiveButton("확인") { dialog, which ->
             val value = et.text.toString()
             Log.e("value", value + "")
             preferenceData.setAPIKey(value)
             dialog.dismiss()
         }
 
-        ad.setNegativeButton("취소") { dialog, _ ->
+        ad.setNegativeButton("취소") { dialog, which ->
             dialog.dismiss()
         }
         ad.show()
