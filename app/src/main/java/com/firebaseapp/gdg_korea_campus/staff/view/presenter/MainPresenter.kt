@@ -3,11 +3,9 @@ package com.firebaseapp.gdg_korea_campus.staff.view.presenter
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
-import android.provider.Settings
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.widget.EditText
-import android.widget.GridLayout
 import android.widget.Toast
 import com.firebaseapp.gdg_korea_campus.staff.Global
 import com.firebaseapp.gdg_korea_campus.staff.adapter.EventAdapterContract
@@ -36,9 +34,9 @@ class MainPresenter : MainContract.Presenter {
         }
 
     override fun loadItems(context: Context, isClear: Boolean) {
-        if (Global.EVENTLIST_DB_URL.isBlank()) {
-            view.showBlankDBKey()
-            return
+        if (Global.EVENT_LIST_DB_URL.isBlank()) {
+            Global.EVENT_LIST_DB_URL = preferenceData.getEventListURL()
+            Log.e("Presenter", "EventListDB Blank")
         }
 
         val mProgressDialog = ProgressDialog.show(context,"", "잠시만 기다려 주세요.",true)
@@ -51,6 +49,9 @@ class MainPresenter : MainContract.Presenter {
                 adapterModel.addItems(list)
                 adapterView?.notifyAdapter()
                 mProgressDialog.dismiss()
+
+                if(list.size == 0)
+                    view.showBlankDBKey()
             }
         })
     }
@@ -80,17 +81,18 @@ class MainPresenter : MainContract.Presenter {
 
     override fun showAPIKeySetDialog(context: Context) {
         val ad = AlertDialog.Builder(context)
-        ad.setTitle("Meetup API Key 입력")
+        ad.setTitle("이벤트 리스트 URL 수정")
 
         val et = EditText(context)
-        et.setText(preferenceData.getAPIKey())
+        et.setText(preferenceData.getEventListURL())
 
         ad.setView(et)
 
         ad.setPositiveButton("확인") { dialog, _ ->
             val value = et.text.toString()
             Log.e("value", value + "")
-            preferenceData.setAPIKey(value)
+            preferenceData.setEventListURL(value)
+            loadItems(context, true)
             dialog.dismiss()
         }
 

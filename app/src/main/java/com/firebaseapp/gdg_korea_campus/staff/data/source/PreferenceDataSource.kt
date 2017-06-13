@@ -8,10 +8,10 @@ import android.content.SharedPreferences
 
 object PreferenceDataSource {
 
-    fun getAPIKey(preferences: SharedPreferences) = preferences.getString("Meetup_API", "")
+    fun getEventListURL(preferences: SharedPreferences) = preferences.getString("EventListURL", "")
 
-    fun setAPIKey(editor: SharedPreferences.Editor, key: String) {
-        editor.putString("Meetup_API", key)
+    fun setEventListURL(editor: SharedPreferences.Editor, url: String) {
+        editor.putString("EventListURL", url)
         editor.commit()
     }
 

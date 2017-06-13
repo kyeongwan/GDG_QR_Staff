@@ -7,6 +7,7 @@ import com.firebaseapp.gdg_korea_campus.staff.Global
 import com.firebaseapp.gdg_korea_campus.staff.data.EventData
 import okhttp3.*
 import org.json.JSONArray
+import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 
@@ -33,7 +34,7 @@ object EventRemoteDataSource : EventDataSource {
             super.run()
             val client = OkHttpClient()
             val request = Request.Builder()
-                    .url(Global.EVENTLIST_DB_URL)
+                    .url(Global.EVENT_LIST_DB_URL)
                     .get()
                     .build()
 
@@ -52,9 +53,12 @@ object EventRemoteDataSource : EventDataSource {
 
             } catch (e: IOException) {
                 e.printStackTrace()
+            } catch (e : JSONException){
+                e.printStackTrace()
             }
 
             handler.post({
+                Log.e("EventDataSource", "CallBack")
                 loadEventCallback?.onLoadEvents(list)
             })
         }
@@ -66,7 +70,7 @@ object EventRemoteDataSource : EventDataSource {
             super.run()
             val client = OkHttpClient()
             val request = Request.Builder()
-                    .url("${Global.EVENTLIST_DB_URL}?id=$_id&sKey=$sKey")
+                    .url("${Global.EVENT_LIST_DB_URL}?id=$_id&sKey=$sKey")
                     .get()
                     .build()
             var result = JSONObject()

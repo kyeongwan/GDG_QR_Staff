@@ -65,9 +65,8 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
     override fun showBlankDBKey() {
         AlertDialog.Builder(this)
-                .setMessage("필수 정보 미입력. 앱을 다시 만드세요")
+                .setMessage("DB가 비어있거나 URL이 잘못되었습니다.")
                 .setPositiveButton(android.R.string.ok, null)
-                .setOnDismissListener { finish() }
                 .show()
     }
 
@@ -81,7 +80,7 @@ class MainActivity : AppCompatActivity(), MainContract.View {
 
         ad.setPositiveButton("확인") { dialog, _ ->
             val value = et.text.toString()
-            Log.e("value", value + "")
+            Log.e("SecuritKeyDialog", value + "")
             presenter.loadOpenKey(this@MainActivity, _id, value)
             dialog.dismiss()
         }
