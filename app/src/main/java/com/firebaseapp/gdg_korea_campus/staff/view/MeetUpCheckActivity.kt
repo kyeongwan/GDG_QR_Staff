@@ -1,7 +1,6 @@
 package com.firebaseapp.gdg_korea_campus.staff.view
 
 import android.Manifest
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.support.v4.app.ActivityCompat
@@ -13,30 +12,47 @@ import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import com.firebaseapp.gdg_korea_campus.staff.R
+import com.firebaseapp.gdg_korea_campus.staff.adapter.RSVPListAdapter
+import com.firebaseapp.gdg_korea_campus.staff.data.source.MeetUpRSVPRepository
+import com.firebaseapp.gdg_korea_campus.staff.view.presenter.MeetUpCheckContract
+import com.firebaseapp.gdg_korea_campus.staff.view.presenter.MeetUpCheckPresenter
 import com.google.zxing.integration.android.IntentIntegrator
+import kotlinx.android.synthetic.main.check_layout.*
 
-import org.json.JSONException
-import org.json.JSONObject
+class MeetUpCheckActivity : AppCompatActivity(), MeetUpCheckContract.View {
 
-import java.io.IOException
 
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.lang.Integer.parseInt
 
-class CheckActivity : AppCompatActivity() {
 
-    lateinit var url: String
-    lateinit var mProgressDialog: ProgressDialog
+    private lateinit var presenter: MeetUpCheckPresenter
+    lateinit var rsvpListAdapter: RSVPListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        url = intent.getStringExtra("url")
+        setContentView(R.layout.check_layout)
 
 
+        rsvpListAdapter = RSVPListAdapter()
+        lv_check_rsvplist.adapter = rsvpListAdapter
+
+        permissionCheck()
+
+        bt_check_restartCam.setOnClickListener { IntentIntegrator(this).initiateScan() }
+
+        presenter = MeetUpCheckPresenter().apply {
+            view = this@MeetUpCheckActivity
+            rsvpData = MeetUpRSVPRepository
+            adapterModel = rsvpListAdapter
+            adapterView = rsvpListAdapter
+            url = intent.getStringExtra("url")
+            apiKey = intent.getStringExtra("API")
+        }
+
+        presenter.loadRSVPList(this, false)
+
+    }
+
+    fun permissionCheck(){
         val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
         if (permissionCheck == PackageManager.PERMISSION_DENIED) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
@@ -46,11 +62,30 @@ class CheckActivity : AppCompatActivity() {
                     ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
                 }
             }
-        } else {
-            IntentIntegrator(this).initiateScan()
         }
+    }
 
+    override fun startCam() = IntentIntegrator(this).initiateScan()
 
+    override fun showDialog(msg: String) {
+        AlertDialog.Builder(this)
+                .setMessage(msg)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+    }
+
+    override fun showMemberAnswerAndCheckRSVP(msg: String, _id: Int) {
+
+        AlertDialog.Builder(this)
+                .setMessage(msg)
+                .setPositiveButton("확인") { dialog, _ ->
+                    presenter.checkAttend(this, _id)
+                    dialog.dismiss()
+                }
+                .setNegativeButton("취소") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -64,10 +99,8 @@ class CheckActivity : AppCompatActivity() {
 
                 val data = decrypt(result.contents, "gdgkrcampus")
                 val d = data.split("/")
-                val thread = NetworkThread(d[0], d[1])
-                thread.start()
-                mProgressDialog = ProgressDialog.show(this@CheckActivity, "", "잠시만 기다려 주세요.", true)
 
+                presenter.checkAttend(this,data)
             }
         } else {
             Log.d("CheckActivity", "Weird")
@@ -88,58 +121,6 @@ class CheckActivity : AppCompatActivity() {
     }
 
 
-    internal inner class NetworkThread(val row: String, val mail: String) : Thread() {
-
-        override fun run() {
-            val client = OkHttpClient()
-            val jsonObject = JSONObject()
-            try {
-                jsonObject.put("row", parseInt(row))
-                jsonObject.put("mail", mail)
-            } catch (e: JSONException) {
-                e.printStackTrace()
-            }
-
-            val body1 = MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("row", "${parseInt(row) + 1}")
-                    .addFormDataPart("mail", mail)
-                    .build()
-            val request = Request.Builder()
-                    .url(url)
-                    .post(body1)
-                    .build()
-            try {
-                val response = client.newCall(request).execute()
-                val responseString = response.body().string().toString()
-                Log.e("Result", responseString)
-                runOnUiThread {
-                    mProgressDialog.dismiss()
-                    if (responseString == "{\"result\":\"success\"}") {
-                        val alert = AlertDialog.Builder(this@CheckActivity)
-                        alert.setPositiveButton("OK") { dialog, _ ->
-                            dialog.dismiss()
-                        }
-                        alert.setMessage("확인 되었습니다")
-                        alert.setOnDismissListener {
-                            IntentIntegrator(this@CheckActivity).initiateScan()
-                        }
-                        alert.show()
-                    } else {
-                        val alert = AlertDialog.Builder(this@CheckActivity)
-                        alert.setPositiveButton("OK") { dialog, which ->
-                            dialog.dismiss()
-                        }
-                        alert.setMessage("확인되지 않은 사용자입니다.")
-                        alert.show()
-                    }
-                }
-
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-        }
-    }
 
 
 }

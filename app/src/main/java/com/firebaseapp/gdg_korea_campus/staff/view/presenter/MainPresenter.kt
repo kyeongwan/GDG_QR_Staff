@@ -14,6 +14,7 @@ import com.firebaseapp.gdg_korea_campus.staff.data.source.EventDataSource
 import com.firebaseapp.gdg_korea_campus.staff.data.source.EventRepository
 import com.firebaseapp.gdg_korea_campus.staff.data.source.PreferenceRepository
 import com.firebaseapp.gdg_korea_campus.staff.view.CheckActivity
+import com.firebaseapp.gdg_korea_campus.staff.view.MeetUpCheckActivity
 import org.json.JSONObject
 
 /**
@@ -39,7 +40,7 @@ class MainPresenter : MainContract.Presenter {
             Log.e("Presenter", "EventListDB Blank")
         }
 
-        val mProgressDialog = ProgressDialog.show(context,"", "잠시만 기다려 주세요.",true)
+        val mProgressDialog = ProgressDialog.show(context, "", "잠시만 기다려 주세요.", true)
         eventData.getEvents(context, 10, object : EventDataSource.LoadEventCallback {
             override fun onLoadEvents(list: ArrayList<EventData>) {
                 if (isClear) {
@@ -48,26 +49,44 @@ class MainPresenter : MainContract.Presenter {
 
                 adapterModel.addItems(list)
                 adapterView?.notifyAdapter()
-                mProgressDialog.dismiss()
+                try {
+                    mProgressDialog.dismiss()
+                }catch (e: IllegalArgumentException){
+                    // ignore
+                }
 
-                if(list.size == 0)
+                if (list.size == 0)
                     view.showBlankDBKey()
             }
         })
     }
 
-    override fun loadOpenKey(context: Context, id:String, sKey: String) {
-        val mProgressDialog = ProgressDialog.show(context,"", "잠시만 기다려 주세요.",true)
-        eventData.getOpenKey(id, sKey, object : EventDataSource.LoadOpenKeyCallback{
+    override fun loadOpenKey(context: Context, id: String, sKey: String) {
+        val mProgressDialog = ProgressDialog.show(context, "", "잠시만 기다려 주세요.", true)
+        eventData.getOpenKey(id, sKey, object : EventDataSource.LoadOpenKeyCallback {
             override fun onLoadOpenKey(result: JSONObject) {
+
                 Log.e("onLoadOpenKey", "result = $result")
+
                 mProgressDialog.dismiss()
-                if(result.getString("result").equals("Fail")){
+
+                if (result.getString("result").equals("Fail")) {
                     Toast.makeText(context, "비밀키가 다릅니다.", 1000).show()
-                }else {
-                    val intent = Intent(context, CheckActivity::class.java)
-                    intent.putExtra("url", result.getString("result"))
-                    context.startActivity(intent)
+                    return
+                }
+
+
+                if (result.getString("type").equals("meetup")) {
+                    context.startActivity(
+                            Intent(context, MeetUpCheckActivity::class.java).run {
+                                putExtra("url", result.getString("result"))
+                                putExtra("API", result.getString("API"))
+                            })
+                } else {
+                    context.startActivity(
+                            Intent(context, CheckActivity::class.java).run {
+                                putExtra("url", result.getString("result"))
+                            })
                 }
             }
         })

@@ -42,7 +42,7 @@ object EventRemoteDataSource : EventDataSource {
             try {
                 val response = client.newCall(request).execute()
                 val responseString = response.body().string().toString()
-                Log.e("aa", responseString)
+                Log.e("EventRemoteDataSource", "Type : Load Event List, Result : " + responseString)
                 val responseJson = JSONArray(responseString)
                 Log.e("Result", responseJson.toString())
 
@@ -77,7 +77,7 @@ object EventRemoteDataSource : EventDataSource {
             try {
                 val response = client.newCall(request).execute()
                 val responseString = response.body().string().toString()
-                Log.e("aa", responseString)
+                Log.e("EventRemoteDataSource", "Type : id, sKey check, Result : " + responseString)
                 result = JSONObject(responseString)
 
             } catch (e: IOException) {
