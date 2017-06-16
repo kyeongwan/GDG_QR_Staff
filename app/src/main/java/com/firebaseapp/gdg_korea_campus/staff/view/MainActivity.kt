@@ -1,145 +1,146 @@
 package com.firebaseapp.gdg_korea_campus.staff.view
 
-import android.Manifest
 import android.app.ProgressDialog
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import android.util.Base64
+import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.EditText
 import android.widget.Toast
 import com.firebaseapp.gdg_korea_campus.staff.R
+import com.firebaseapp.gdg_korea_campus.staff.adapter.EventListAdapter
+import com.firebaseapp.gdg_korea_campus.staff.data.source.EventRepository
+import com.firebaseapp.gdg_korea_campus.staff.data.source.PreferenceRepository
+import com.firebaseapp.gdg_korea_campus.staff.view.presenter.MainContract
+import com.firebaseapp.gdg_korea_campus.staff.view.presenter.MainPresenter
+import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.content_main.*
 
-import com.google.zxing.integration.android.IntentIntegrator
+/**
+ * Created by lk on 2017. 4. 27..
+ */
+class MainActivity : AppCompatActivity(), MainContract.View {
 
-import org.json.JSONException
-import org.json.JSONObject
+    private lateinit var presenter: MainContract.Presenter
+    lateinit var eventListAdapter: EventListAdapter
 
-import java.io.IOException
-
-import okhttp3.MultipartBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.lang.Integer.parseInt
-
-class MainActivity : AppCompatActivity() {
-
-    lateinit var url: String
-    lateinit var mProgressDialog : ProgressDialog
+    private val progressDlg by lazy {
+        ProgressDialog(this).apply {
+            setMessage("잠시만 기다려 주세요.")
+            setCancelable(false)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(toolbar)
 
-        url = intent.getStringExtra("url")
+        eventListAdapter = EventListAdapter()
+        lv_main_eventlist.adapter = eventListAdapter
 
-        val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-        if (permissionCheck == PackageManager.PERMISSION_DENIED) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
-                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_CONTACTS)) {
-                } else {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 1)
-                }
-            }
-        } else {
-            IntentIntegrator.initiateScan(this)
+        presenter = MainPresenter().apply {
+            view = this@MainActivity
+            eventData = EventRepository
+            preferenceData = PreferenceRepository(getSharedPreferences("pref", MODE_PRIVATE))
+            adapterModel = eventListAdapter
+            adapterView = eventListAdapter
         }
 
+        presenter.loadItems(this, false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        val id = item?.itemId
+        if (id == R.id.action_settings) {
+            showAPIKeySetDialog()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
 
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data)
-        if (result != null) {
-            if (result.contents == null) {
-                Log.d("MainActivity", "Cancelled scan")
-                Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show()
-            } else {
-                Log.d("MainActivity", "${result.contents}")
-
-                val data = decrypt(result.contents, "gdgkrcampus")
-                val d = data.split("/")
-                val thread = NetworkThread(d[0], d[1])
-                thread.start()
-                mProgressDialog = ProgressDialog.show(this@MainActivity,"", "잠시만 기다려 주세요.",true)
-
-            }
-        } else {
-            Log.d("MainActivity", "Weird")
-            // This is important, otherwise the result will not be passed to the fragment
-            super.onActivityResult(requestCode, resultCode, data)
-        }
+    override fun showBlankDBKey() {
+        AlertDialog.Builder(this)
+                .setMessage("DB가 비어있거나 URL이 잘못되었습니다.")
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
     }
 
-    fun decrypt(data: String, key: String) : String{
-        val result = Base64.decode(data, 0)
-        var results = ""
-        for(i in result.indices){
-            val c = result[i].toInt().let { if(it < 0) it+256 else it }
-            val keychar = key[ (i%key.length -1).let { if (it == -1) key.length-1 else it } ].toInt()
-            results += (c - keychar).toChar()
-        }
-        return results
-    }
+    override fun showSecurityKeyDialog(_id: String) {
+//        Toast.makeText(applicationContext, _id, Toast.LENGTH_SHORT).show()
 
+        AlertDialog.Builder(this@MainActivity).apply {
+            setTitle("비밀키 입력")
 
-    internal inner class NetworkThread(val row: String, val mail: String) : Thread() {
+            val et = EditText(this@MainActivity)
+            setView(et)
 
-        override fun run() {
-            val client = OkHttpClient()
-            val jsonObject = JSONObject()
-            try {
-                jsonObject.put("row", parseInt(row))
-                jsonObject.put("mail", mail)
-            } catch (e: JSONException) {
-                e.printStackTrace()
+            setPositiveButton("확인") { _, _ ->
+                val value = et.text.toString()
+                Log.e("SecurityKeyDialog", value + "")
+                presenter.loadOpenKey(this@MainActivity, _id, value)
             }
 
-            val body1 = MultipartBody.Builder().setType(MultipartBody.FORM)
-                    .addFormDataPart("row", "${parseInt(row) + 1}")
-                    .addFormDataPart("mail", mail)
-                    .build()
-            val request = Request.Builder()
-                    .url(url)
-                    .post(body1)
-                    .build()
-            try {
-                val response = client.newCall(request).execute()
-                val responseString = response.body().string().toString()
-                Log.e("Result", responseString)
-                runOnUiThread {
-                    mProgressDialog.dismiss()
-                    if (responseString == "{\"result\":\"success\"}") {
-                        val alert = AlertDialog.Builder(this@MainActivity)
-                        alert.setPositiveButton("OK"){ dialog, which ->
-                             dialog.dismiss()
-                        }
-                        alert.setMessage("확인 되었습니다")
-                        alert.setOnDismissListener {
-                            IntentIntegrator.initiateScan(this@MainActivity)
-                        }
-                        alert.show()
-                    } else {
-                        val alert = AlertDialog.Builder(this@MainActivity)
-                        alert.setPositiveButton("OK"){ dialog, which ->
-                            dialog.dismiss()
-                        }
-                        alert.setMessage("확인되지 않은 사용자입니다.")
-                        alert.show()
-                    }
-                }
-
-            } catch (e: IOException) {
-                e.printStackTrace()
-            }
-
-        }
+            setNegativeButton("취소", null)
+        }.show()
     }
 
+    override fun showMessage(msg: String) {
+        Toast.makeText(applicationContext, msg, Toast.LENGTH_SHORT).show()
+    }
 
+    override fun showProgress() {
+        if (progressDlg.isShowing) {
+            dismissProgress()
+        }
+        progressDlg.show()
+    }
+
+    override fun dismissProgress() {
+        progressDlg.hide()
+    }
+
+    fun showAPIKeySetDialog() {
+        AlertDialog.Builder(this).apply {
+            setTitle("이벤트 리스트 URL 수정")
+
+            val et = EditText(this@MainActivity)
+            et.setText(presenter.getEventListURL())
+
+            setView(et)
+
+            setPositiveButton("확인") { _, _ ->
+                val value = et.text.toString()
+                Log.e("value", value + "")
+                presenter.setEventListURL(value)
+                presenter.loadItems(this@MainActivity, true)
+            }
+
+            setNegativeButton("취소", null)
+        }.show()
+    }
+
+    override fun startMeetUpCheck(result: String, api: String) {
+        startActivity(
+                Intent(this, MeetUpCheckActivity::class.java).apply {
+                    putExtra("url", result)
+                    putExtra("API", api)
+                })
+    }
+
+    override fun startCheckQR(result: String) {
+        startActivity(
+                Intent(this, CheckActivity::class.java).run {
+                    putExtra("url", result)
+                })
+    }
 }

@@ -6,35 +6,36 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.firebaseapp.gdg_korea_campus.staff.R
-import com.firebaseapp.gdg_korea_campus.staff.data.EventData
+import com.firebaseapp.gdg_korea_campus.staff.data.MeetUpRSVP
 
 /**
- * Created by lk on 2017. 4. 27..
+ * Created by lk on 2017. 6. 15..
  */
+class RSVPListAdapter : RSVPAdapterContract.View, BaseAdapter(), RSVPAdapterContract.Model{
 
-class EventListAdapter : EventAdapterContract.View, BaseAdapter(), EventAdapterContract.Model{
-    override fun getView(p: Int,convertView: View?, parent: ViewGroup): View {
+    override fun getView(p: Int, convertView: View?, parent: ViewGroup): View {
         var view = convertView
         if(view == null){
             view = LayoutInflater.from(parent.context).inflate(R.layout.item_event, parent, false)
         }
 
         val tv = view!!.findViewById(R.id.tv_event_title) as TextView
-        tv.text = getItem(p).title
+        tv.text = getItem(p).member.name
         view.setOnClickListener { onClickFunc?.invoke(p) }
 
         return view
     }
 
     override fun getItemId(p: Int) = p.toLong()
-    private var eventList: ArrayList<EventData> = ArrayList()
+    private var rsvpList: ArrayList<MeetUpRSVP> = ArrayList()
     override var onClickFunc: ((Int) -> Unit)? = null
 
-    override fun getItem(p: Int) = eventList[p]
-    override fun addItems(items: ArrayList<EventData>) {eventList = items}
-    override fun clearItem() = eventList.clear()
+    override fun getItem(p: Int) = rsvpList[p]
+    override fun addItems(items: ArrayList<MeetUpRSVP>) {
+        rsvpList = items}
+    override fun clearItem() = rsvpList.clear()
     override fun notifyAdapter() = notifyDataSetChanged()
-    override fun getCount() = eventList.size
+    override fun getCount() = rsvpList.size
 
 
 

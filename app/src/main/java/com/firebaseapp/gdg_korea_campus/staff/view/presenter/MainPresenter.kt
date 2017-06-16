@@ -1,15 +1,12 @@
 package com.firebaseapp.gdg_korea_campus.staff.view.presenter
 
-import android.app.ProgressDialog
 import android.content.Context
-import android.content.Intent
 import android.util.Log
-import android.widget.Toast
+import com.firebaseapp.gdg_korea_campus.staff.Global
 import com.firebaseapp.gdg_korea_campus.staff.adapter.EventAdapterContract
 import com.firebaseapp.gdg_korea_campus.staff.data.EventData
 import com.firebaseapp.gdg_korea_campus.staff.data.source.EventDataSource
-import com.firebaseapp.gdg_korea_campus.staff.data.source.EventRepository
-import com.firebaseapp.gdg_korea_campus.staff.view.MainActivity
+import com.firebaseapp.gdg_korea_campus.staff.data.source.PreferenceRepository
 import org.json.JSONObject
 
 /**
@@ -18,18 +15,25 @@ import org.json.JSONObject
 
 class MainPresenter : MainContract.Presenter {
 
-    lateinit override var view: MainContract.View
-    lateinit override var eventData: EventRepository
+    lateinit var view: MainContract.View
+    lateinit var eventData: EventDataSource
+    lateinit var preferenceData: PreferenceRepository
 
-    lateinit override var adapterModel: EventAdapterContract.Model
-    override var adapterView: EventAdapterContract.View? = null
+    lateinit var adapterModel: EventAdapterContract.Model
+
+    var adapterView: EventAdapterContract.View? = null
         set(value) {
             field = value
             field?.onClickFunc = { onClickListener(it) }
         }
 
     override fun loadItems(context: Context, isClear: Boolean) {
-        val mProgressDialog = ProgressDialog.show(context,"", "잠시만 기다려 주세요.",true)
+        if (Global.EVENT_LIST_DB_URL.isBlank()) {
+            Global.EVENT_LIST_DB_URL = preferenceData.getEventListURL()
+            Log.e("Presenter", "EventListDB Blank")
+        }
+
+        view.showProgress()
         eventData.getEvents(context, 10, object : EventDataSource.LoadEventCallback {
             override fun onLoadEvents(list: ArrayList<EventData>) {
                 if (isClear) {
@@ -38,23 +42,38 @@ class MainPresenter : MainContract.Presenter {
 
                 adapterModel.addItems(list)
                 adapterView?.notifyAdapter()
-                mProgressDialog.dismiss()
+
+                view.dismissProgress()
+
+                if (list.size == 0)
+                    view.showBlankDBKey()
             }
         })
     }
 
-    override fun loadOpenKey(context: Context, id:String, sKey: String) {
-        val mProgressDialog = ProgressDialog.show(context,"", "잠시만 기다려 주세요.",true)
-        eventData.getOpenKey(id, sKey, object : EventDataSource.LoadOpenKeyCallback{
+    override fun loadOpenKey(context: Context, id: String, sKey: String) {
+        if (sKey.isBlank()) {
+            view.showMessage("비밀키를 입력해주세요")
+            return
+        }
+
+        view.showProgress()
+        eventData.getOpenKey(id, sKey, object : EventDataSource.LoadOpenKeyCallback {
             override fun onLoadOpenKey(result: JSONObject) {
+
                 Log.e("onLoadOpenKey", "result = $result")
-                mProgressDialog.dismiss()
-                if(result.getString("result").equals("Fail")){
-                    Toast.makeText(context, "비밀키가 다릅니다.", 1000).show()
-                }else {
-                    val intent = Intent(context, MainActivity::class.java)
-                    intent.putExtra("url", result.getString("result"))
-                    context.startActivity(intent)
+
+                view.dismissProgress()
+
+                if (result.getString("result") == "Fail") {
+                    view.showMessage("비밀키가 다릅니다.")
+                    return
+                }
+
+                if (result.getString("type") == "meetup") {
+                    view.startMeetUpCheck(result.getString("result"), result.getString("API"))
+                } else {
+                    view.startCheckQR(result.getString("result"))
                 }
             }
         })
@@ -62,7 +81,13 @@ class MainPresenter : MainContract.Presenter {
 
     private fun onClickListener(position: Int) {
         adapterModel.getItem(position).let {
-            view.showDialog(it._id)
+            view.showSecurityKeyDialog(it._id)
         }
     }
+
+    override fun setEventListURL(url: String) {
+        preferenceData.setEventListURL(url)
+    }
+
+    override fun getEventListURL() = preferenceData.getEventListURL()
 }
