@@ -1,20 +1,12 @@
 package com.firebaseapp.gdg_korea_campus.staff.view.presenter
 
-import android.app.ProgressDialog
 import android.content.Context
-import android.content.Intent
-import android.support.v7.app.AlertDialog
 import android.util.Log
-import android.widget.EditText
-import android.widget.Toast
 import com.firebaseapp.gdg_korea_campus.staff.Global
 import com.firebaseapp.gdg_korea_campus.staff.adapter.EventAdapterContract
 import com.firebaseapp.gdg_korea_campus.staff.data.EventData
 import com.firebaseapp.gdg_korea_campus.staff.data.source.EventDataSource
-import com.firebaseapp.gdg_korea_campus.staff.data.source.EventRepository
 import com.firebaseapp.gdg_korea_campus.staff.data.source.PreferenceRepository
-import com.firebaseapp.gdg_korea_campus.staff.view.CheckActivity
-import com.firebaseapp.gdg_korea_campus.staff.view.MeetUpCheckActivity
 import org.json.JSONObject
 
 /**
@@ -23,12 +15,13 @@ import org.json.JSONObject
 
 class MainPresenter : MainContract.Presenter {
 
-    lateinit override var view: MainContract.View
-    lateinit override var eventData: EventRepository
-    lateinit override var preferenceData: PreferenceRepository
+    lateinit var view: MainContract.View
+    lateinit var eventData: EventDataSource
+    lateinit var preferenceData: PreferenceRepository
 
-    lateinit override var adapterModel: EventAdapterContract.Model
-    override var adapterView: EventAdapterContract.View? = null
+    lateinit var adapterModel: EventAdapterContract.Model
+
+    var adapterView: EventAdapterContract.View? = null
         set(value) {
             field = value
             field?.onClickFunc = { onClickListener(it) }
@@ -40,7 +33,7 @@ class MainPresenter : MainContract.Presenter {
             Log.e("Presenter", "EventListDB Blank")
         }
 
-        val mProgressDialog = ProgressDialog.show(context, "", "잠시만 기다려 주세요.", true)
+        view.showProgress()
         eventData.getEvents(context, 10, object : EventDataSource.LoadEventCallback {
             override fun onLoadEvents(list: ArrayList<EventData>) {
                 if (isClear) {
@@ -49,11 +42,8 @@ class MainPresenter : MainContract.Presenter {
 
                 adapterModel.addItems(list)
                 adapterView?.notifyAdapter()
-                try {
-                    mProgressDialog.dismiss()
-                }catch (e: IllegalArgumentException){
-                    // ignore
-                }
+
+                view.dismissProgress()
 
                 if (list.size == 0)
                     view.showBlankDBKey()
@@ -62,31 +52,28 @@ class MainPresenter : MainContract.Presenter {
     }
 
     override fun loadOpenKey(context: Context, id: String, sKey: String) {
-        val mProgressDialog = ProgressDialog.show(context, "", "잠시만 기다려 주세요.", true)
+        if (sKey.isBlank()) {
+            view.showMessage("비밀키를 입력해주세요")
+            return
+        }
+
+        view.showProgress()
         eventData.getOpenKey(id, sKey, object : EventDataSource.LoadOpenKeyCallback {
             override fun onLoadOpenKey(result: JSONObject) {
 
                 Log.e("onLoadOpenKey", "result = $result")
 
-                mProgressDialog.dismiss()
+                view.dismissProgress()
 
-                if (result.getString("result").equals("Fail")) {
-                    Toast.makeText(context, "비밀키가 다릅니다.", 1000).show()
+                if (result.getString("result") == "Fail") {
+                    view.showMessage("비밀키가 다릅니다.")
                     return
                 }
 
-
-                if (result.getString("type").equals("meetup")) {
-                    context.startActivity(
-                            Intent(context, MeetUpCheckActivity::class.java).run {
-                                putExtra("url", result.getString("result"))
-                                putExtra("API", result.getString("API"))
-                            })
+                if (result.getString("type") == "meetup") {
+                    view.startMeetUpCheck(result.getString("result"), result.getString("API"))
                 } else {
-                    context.startActivity(
-                            Intent(context, CheckActivity::class.java).run {
-                                putExtra("url", result.getString("result"))
-                            })
+                    view.startCheckQR(result.getString("result"))
                 }
             }
         })
@@ -94,30 +81,13 @@ class MainPresenter : MainContract.Presenter {
 
     private fun onClickListener(position: Int) {
         adapterModel.getItem(position).let {
-            view.showSecuritKeyDialog(it._id)
+            view.showSecurityKeyDialog(it._id)
         }
     }
 
-    override fun showAPIKeySetDialog(context: Context) {
-        val ad = AlertDialog.Builder(context)
-        ad.setTitle("이벤트 리스트 URL 수정")
-
-        val et = EditText(context)
-        et.setText(preferenceData.getEventListURL())
-
-        ad.setView(et)
-
-        ad.setPositiveButton("확인") { dialog, _ ->
-            val value = et.text.toString()
-            Log.e("value", value + "")
-            preferenceData.setEventListURL(value)
-            loadItems(context, true)
-            dialog.dismiss()
-        }
-
-        ad.setNegativeButton("취소") { dialog, _ ->
-            dialog.dismiss()
-        }
-        ad.show()
+    override fun setEventListURL(url: String) {
+        preferenceData.setEventListURL(url)
     }
+
+    override fun getEventListURL() = preferenceData.getEventListURL()
 }
