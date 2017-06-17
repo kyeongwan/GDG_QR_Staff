@@ -8,6 +8,8 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Base64
 import android.util.Log
 import android.widget.Toast
@@ -17,27 +19,23 @@ import com.firebaseapp.gdg_korea_campus.staff.data.source.MeetUpRSVPRepository
 import com.firebaseapp.gdg_korea_campus.staff.view.presenter.MeetUpCheckContract
 import com.firebaseapp.gdg_korea_campus.staff.view.presenter.MeetUpCheckPresenter
 import com.google.zxing.integration.android.IntentIntegrator
-import kotlinx.android.synthetic.main.check_layout.*
+import kotlinx.android.synthetic.main.check_meetup_layout.*
 
 class MeetUpCheckActivity : AppCompatActivity(), MeetUpCheckContract.View {
 
-
-
-
     private lateinit var presenter: MeetUpCheckPresenter
-    lateinit var rsvpListAdapter: RSVPListAdapter
+    private lateinit var rsvpListAdapter: RSVPListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.check_layout)
-
+        setContentView(R.layout.check_meetup_layout)
 
         rsvpListAdapter = RSVPListAdapter()
-        lv_check_rsvplist.adapter = rsvpListAdapter
+        lv_checkmeetup_rsvplist.adapter = rsvpListAdapter
 
         permissionCheck()
 
-        bt_check_restartCam.setOnClickListener { IntentIntegrator(this).initiateScan() }
+        bt_checkmeetup_restartCam.setOnClickListener { IntentIntegrator(this).initiateScan() }
 
         presenter = MeetUpCheckPresenter().apply {
             view = this@MeetUpCheckActivity
@@ -49,6 +47,17 @@ class MeetUpCheckActivity : AppCompatActivity(), MeetUpCheckContract.View {
         }
 
         presenter.loadRSVPList(this, false)
+
+        et_checkmeetup_answer.addTextChangedListener(object: TextWatcher{
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                presenter.searchRSVP(applicationContext, s.toString())
+            }
+
+            override fun afterTextChanged(p0: Editable?) {}
+
+        })
 
     }
 
@@ -75,7 +84,6 @@ class MeetUpCheckActivity : AppCompatActivity(), MeetUpCheckContract.View {
     }
 
     override fun showMemberAnswerAndCheckRSVP(msg: String, _id: Int) {
-
         AlertDialog.Builder(this)
                 .setMessage(msg)
                 .setPositiveButton("확인") { dialog, _ ->
@@ -119,8 +127,4 @@ class MeetUpCheckActivity : AppCompatActivity(), MeetUpCheckContract.View {
         }
         return results
     }
-
-
-
-
 }

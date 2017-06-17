@@ -13,7 +13,7 @@ interface RSVPAdapterContract {
     }
 
     interface Model {
-        fun addItems(item: ArrayList<MeetUpRSVP>)
+        fun addItems(item: List<MeetUpRSVP>)
         fun clearItem()
         fun getItem(position: Int): MeetUpRSVP
     }

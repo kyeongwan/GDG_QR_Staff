@@ -16,6 +16,7 @@ import org.json.JSONObject
 
 class MeetUpCheckPresenter : MeetUpCheckContract.Presenter {
 
+
     lateinit override var view: MeetUpCheckContract.View
     lateinit override var rsvpData: MeetUpRSVPRepository
     var rsvpList = ArrayList<MeetUpRSVP>()
@@ -90,6 +91,12 @@ class MeetUpCheckPresenter : MeetUpCheckContract.Presenter {
             }
 
         })
+    }
+
+    override fun searchRSVP(context: Context, s: String) {
+        adapterModel.clearItem()
+        adapterModel.addItems( rsvpList.filter { it.answer.contains(s) })
+        adapterView?.notifyAdapter()
     }
 
     private fun onClickListener(position: Int) {

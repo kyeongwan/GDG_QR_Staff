@@ -27,12 +27,14 @@ class RSVPListAdapter : RSVPAdapterContract.View, BaseAdapter(), RSVPAdapterCont
     }
 
     override fun getItemId(p: Int) = p.toLong()
-    private var rsvpList: ArrayList<MeetUpRSVP> = ArrayList()
+    private var rsvpList: MutableList<MeetUpRSVP> = ArrayList()
     override var onClickFunc: ((Int) -> Unit)? = null
 
     override fun getItem(p: Int) = rsvpList[p]
-    override fun addItems(items: ArrayList<MeetUpRSVP>) {
-        rsvpList = items}
+    override fun addItems(items: List<MeetUpRSVP>) {
+        rsvpList.clear()
+        rsvpList.addAll(items)
+    }
     override fun clearItem() = rsvpList.clear()
     override fun notifyAdapter() = notifyDataSetChanged()
     override fun getCount() = rsvpList.size

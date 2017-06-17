@@ -26,6 +26,7 @@ interface MeetUpCheckContract {
         fun loadRSVPList(context: Context, isClear: Boolean)
         fun checkAttend(context: Context, data: String)
         fun checkAttend(context: Context, _id: Int)
+        fun searchRSVP(context: Context, s: String)
     }
 
 }
