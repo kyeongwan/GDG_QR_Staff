@@ -32,9 +32,10 @@ http.createServer(function (request, response) {
                 console.log(response2.statusCode);
                 console.log(JSON.parse(body.toString())); // JSON 파싱을 추가했습니다.
                 access_Token = JSON.parse(body.toString()).id;
-                var name = JSON.parse(body.toString()).name;
+                // var name = JSON.parse(body.toString()).name;
+                // console.log(name);
                 response.writeHead(301,
-                  {Location: 'http://lemonlab.co.kr/gdg/qrcode.html?mail='+access_Token + '&code='+name} 
+                  {Location: 'http://lemonlab.co.kr/gdg/qrcode.html?mail='+access_Token} 
                 );
                 response.end();
             });
