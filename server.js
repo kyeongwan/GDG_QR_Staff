@@ -1,9 +1,9 @@
-var http = require('http');
+var https = require('https');
 var fs = require('fs');
 var path = require('path');
 
 
-http.createServer(function (request, response) {
+https.createServer(function (request, response) {
     console.log('request starting...');
 
     var access_Token = "";
@@ -13,8 +13,8 @@ http.createServer(function (request, response) {
 
     if (filePath.indexOf("./OAuth/") == 0){
         console.log(filePath);
-        var https = require('https'); // http를 https로 고쳤습니다.
-        var request = https.request({
+        var https2 = require('https'); // http를 https로 고쳤습니다.
+        var request = https2.request({
             hostname: 'api.meetup.com',
             path: '/2/member/self/',
             method: 'GET',
