@@ -63,16 +63,15 @@
 	</head>
 	<body>
 		<div class="center">
-			<form action="https://secure.meetup.com/oauth2/authorize?client_id=1en2tpbo89i57gu6s666if6npo&response_type=token&redirect_uri=http://lemonlab.co.kr/gdg/qr_redirect.php" method="post">
+			<form action="https://secure.meetup.com/oauth2/authorize?client_id=1en2tpbo89i57gu6s666if6npo&response_type=token&redirect_uri=https://gdg-qr-code.herokuapp.com/qr_redirect.html" method="post">
 				<div class="logo">
 					<img src="./logo-white.svg" width="100px" height="100px"></svg>
 				</div>
 				<div class="header">
-					<p>등록하신 이메일 주소를 기입해주세요</p>
+					<p>QR코드 발급받기</p>
 				</div>
 				<div class="input">
-					<input type="email" name="mail" id="email" placeholder="gdg.korea@gmail.com">
-					<input type="submit" class="button" id="submit" value="확인">
+					<input type="submit" class="button" id="submit" value="Meetup.com에 로그인">
 				</div>
 			</form>
 		</div>
