@@ -1,0 +1,86 @@
+<html>
+<head>
+<meta charset="utf-8">
+<title>Demo page</title>
+
+<?php
+
+	$mail = htmlspecialchars($_REQUEST["mail"]);
+	$code = htmlspecialchars($_REQUEST["code"]);
+	$row = htmlspecialchars($_REQUEST["row"]);
+
+	if($code == 0){
+		$code = mt_rand(10, 21000);
+	}
+
+	if($row == 0){
+		$row = mt_rand(10, 21000);
+	}
+
+	if($mail == ""){
+		$mail = "gdg.korea@gmail.com";
+	}
+
+	function encrypt($string, $key) {
+	    $result = '';
+	    for($i=0; $i<strlen($string); $i++) {
+	        $char = substr($string, $i, 1);
+	        $keychar = substr($key, ($i % strlen($key))-1, 1);
+	        $char = chr(ord($char)+ord($keychar));
+	        $result .= $char;
+	    }
+	    return base64_encode($result);
+	}
+
+	function decrypt($string, $key) {
+	    $result = '';
+	    $string = base64_decode($string);
+	    for($i=0; $i<strlen($string); $i++) {
+	        $char = substr($string, $i, 1);
+	        $keychar = substr($key, ($i % strlen($key))-1, 1);
+	        $char = chr(ord($char)-ord($keychar));
+	        $result .= $char;
+	    }
+	    return $result;
+	}
+?>
+</head>
+<body>
+<style type="text/css">
+			body {
+				background: #ffffff;
+				text-align: center;
+		
+			}
+			.form {
+				max-width: 450px;
+				margin: 17% auto;
+			}
+
+</style>
+<div class="form">
+	<p>
+		행사 당일 등록대에 QR코드를 제시해주세요.
+	</p>
+
+	<div id="output"></div>
+	<div id="email"></div>
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+<script type="text/javascript" src="./jquery.qrcode.min.js"></script>
+<script>
+jQuery(function(){
+	var mail = '<?php echo $mail ?>';
+	var code = '<?php echo $code ?>';
+	var row = '<?php echo $row ?>';
+	var date = '<?php echo encrypt($row."/".$mail, "gdgkrcampus");?>'
+
+	jQuery('#output').qrcode(date);
+	jQuery('#email').html('<?php echo $mail ?>');
+})
+</script>
+
+</body>
+</html>

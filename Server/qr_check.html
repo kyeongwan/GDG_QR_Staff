@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="initial-scale=1, width=device-width">
+		<title>GDG Korea</title>
+		<meta property="og:title" content="GDG Korea">
+		<meta property="og:description" content="Google I/O Extended 2017 참석확인용 사이트입니다">
+		<meta name="canonical" content="http://qr.gdg.kr">
+		<style>
+		html,body{
+			width:100%;
+			height:100%;
+		}
+		body {
+			display:-webkit-box;
+			display:-webkit-flex;
+			display:flex;
+			-webkit-align-items:center;
+			align-items:center;
+			-webkit-text-size-adjust:1;
+			margin:0;
+			text-align:center;
+			background:#333;
+			color:#fff;
+			font-family:sans-serif;
+		}
+		.center {
+			margin:auto;
+		}
+		.header {
+			font-size:2em;
+		}
+		.button {
+			display:block;
+			border:1px solid #ffffff;
+			margin:1em 0;
+			padding:1em;
+			width:100%;
+			font-size:1em;
+			border-radius:5px;
+			color:inherit;
+			font:inherit;
+			background:transparent;
+			-webkit-appearance:none;
+			box-sizing:;
+		}
+		#email{
+			display:block;
+			font:inherit;
+			width:100%;
+			margin:10px 0;
+			padding:1em;
+			background:#ffffff;
+			color:#333333;
+			-webkit-appearance:none;
+			box-sizing:border-box;
+		}
+		#submit {
+			font:inherit;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="center">
+			<form action="https://secure.meetup.com/oauth2/authorize?client_id=1en2tpbo89i57gu6s666if6npo&response_type=token&redirect_uri=http://lemonlab.co.kr/gdg/qr_redirect.php" method="post">
+				<div class="logo">
+					<img src="./logo-white.svg" width="100px" height="100px"></svg>
+				</div>
+				<div class="header">
+					<p>등록하신 이메일 주소를 기입해주세요</p>
+				</div>
+				<div class="input">
+					<input type="email" name="mail" id="email" placeholder="gdg.korea@gmail.com">
+					<input type="submit" class="button" id="submit" value="확인">
+				</div>
+			</form>
+		</div>
+
+		<script type="text/javascript">
+			
+		</script>
+		
+	</body>
+
+</html>

@@ -1,0 +1,8 @@
+
+<script> 
+var query=location.hash;
+var res = query.split("&");
+var res2 = res[0].split("=");
+document.write(res2[1]);
+location.href='./OAuth/' + res2[1];
+</script>
