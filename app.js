@@ -3,7 +3,6 @@ var http = require('http');
 var fs = require('fs');
 var path = require('path');
 var request222 = require('request');
-var querystring = require('querystring');
 var port = process.env.PORT || 3000; //*
 
 http.createServer(function (request, response) {
