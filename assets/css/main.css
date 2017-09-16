@@ -1,0 +1,80 @@
+@CHARSET "UTF-8";
+
+.font-small { 
+	font-size: small;
+}
+
+.table > tbody > tr > td {
+	cursor: pointer;
+}
+
+.table > tbody > tr > td, 
+.table > thead > tr > th {
+	text-align: center; 
+	vertical-align: middle; 
+}
+
+.table > tbody > tr > td.concat {
+	overflow: hidden;
+	max-width: 440px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.row { 
+	margin: 0px; 
+}
+
+.setWidth { 
+	max-width: 100px; 
+}
+
+.concat div { 
+	overflow: hidden; 
+	width: inherit; 
+	white-space: nowrap; 
+	text-overflow: ellipsis; 
+}
+
+.treeview {
+	max-width: 250px;
+	max-height: 630px;
+	overflow: auto;
+}
+
+.limit_height_500 {
+	max-height: 500px;
+	overflow: auto;
+}
+
+.limit_height_830 {
+	max-height: 830px;
+	overflow: auto;
+}
+
+.checkbox input[type=checkbox] {
+	position: initial;
+	margin: 0;
+	vertical-align: middle;
+	margin-right: 5px;
+}
+
+input[type=checkbox] {
+	margin: 0;
+}
+
+.table-responsive {
+	min-height: 300px;
+}
+
+#added_group_count {
+	margin-left: 3px;
+}
+
+.max-width-500 {
+	max-width: 500px;
+}
+
+.max-width-220 {
+	max-width: 220px;
+}
