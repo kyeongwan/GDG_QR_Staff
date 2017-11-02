@@ -52,7 +52,7 @@ http.createServer(function (request, response) {
         request.end();
     }else if(filePath.indexOf("./api") == 0) {
 
-        request222.get('http://api.meetup.com/GDG-Seoul/events/242054608/rsvps?key=79a3f666e207865552d12428726849&fields=answers,pay_status&response=yes', function (error, response2, body) {
+        request222.get('http://api.meetup.com/GDG-Campus/events/244427149/rsvps?key=9227e7f83811132d1e5e6a42197510&fields=answers,pay_status&response=yes', function (error, response2, body) {
           console.log('error:', error); // Print the error if one occurred
           console.log('statusCode:', response2 && response2.statusCode); // Print the response status code if a response was received
           // console.log('body:', body); // Print the HTML for the Google homepage.
@@ -136,7 +136,7 @@ http.createServer(function (request, response) {
 
              
             request222.post({ 
-                url: 'http://api.meetup.com/GDG-Seoul/events/242054608/attendance?key=79a3f666e207865552d12428726849',
+                url: 'http://api.meetup.com/GDG-Campus/events/244427149/attendance?key=9227e7f83811132d1e5e6a42197510',
                 form:    {member : reqObj.member, status: reqObj.status},
                 headers: {
                     'Content-Type' : 'application/x-www-form-urlencoded' 
