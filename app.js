@@ -8,6 +8,15 @@ var port = process.env.PORT || 3000; //*
 http.createServer(function (request, response) {
     console.log('request starting...');
 
+    console.log("URL : " + request.url);  
+    var requestBody = "";
+    request.on('data', function(contents) {
+        requestBody += contents;
+    });
+    request.on('end', function() {
+        console.log(requestBody);
+    });
+
     var access_Token = "";
     var filePath = '.' + request.url;
     if (filePath == './')

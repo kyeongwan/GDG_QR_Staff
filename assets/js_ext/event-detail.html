@@ -1,0 +1,437 @@
+<link rel="import" href="./bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="./bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="./bower_components/iron-icon/iron-icon.html">
+
+<link rel="import" href="./bower_components/paper-icon-button/paper-icon-button-light.html">
+<link rel="import" href="./bower_components/paper-spinner/paper-spinner.html">
+
+<link rel="import" href="./bower_components/marked-element/marked-element.html">
+
+<link rel="import" href="../elements/footer-block.html">
+<link rel="import" href="../behaviors/page-behavior.html">
+<link rel="import" href="../behaviors/utils-behavior.html">
+<link rel="import" href="../behaviors/cascaded-behavior.html">
+<link rel="import" href="../elements/logos-block.html">
+<link rel="import" href="../elements/mapdcamp-block.html">
+
+
+  <template>
+
+    <style include="shared-styles">
+      :host {
+        --grid-gutter: 8px;
+        --colums-number: 4;
+        display: block;
+      }
+
+      .markdown-html {
+       line-height: 2rem;
+       color: #444;
+     }
+
+     .markdown-html h3 {
+       margin: 40px;
+       font-weight: bold;
+       font-size: 2rem;
+       text-align: center;
+       color: #3a6d94 ;
+     }
+
+     .markdown-html ul {
+       margin: 0 20px;
+     }
+
+     .details {
+      @apply(--layout-vertical);
+      @apply(--layout-center-justified);
+    }
+
+    .details-item {
+      @apply(--layout-horizontal);
+      margin: 0 auto;
+      padding-bottom: 32px;
+    }
+
+    .team-container {
+      @apply(--layout-vertical);
+      @apply(--layout-wrap);
+    }
+
+    .team-block {
+      margin-bottom: 30px;
+    }
+
+    .team-name {
+      text-align: center;
+    }
+
+    .schedule__block {
+      display: block;
+      text-align: left;
+      width: 100%;
+    }
+
+    .schedule__cell--time--long {
+      width: 150px;
+    }
+
+    .schedule__cell--time {
+      font-weight: 600;
+      color: #333;
+      width: 80px;
+    }
+    .schedule__cell {
+      display: table-cell;
+      padding: 0px 10px;
+      font-size: 1em;
+      font-weight: 400;
+      width: auto;
+      border-top: solid 1px #ddd;
+    }
+
+    .schedule__row {
+      display: table;
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .member {
+      @apply(--layout-horizontal);
+      width: 100%;
+      margin: var(--grid-gutter) 0;
+    }
+
+    .card {
+      @apply(--layout-flex);
+      @apply(--layout-vertical);
+      @apply(--shadow-elevation-2dp);
+      padding: 32px 16px;
+      background: #fff;
+    }
+
+    .card:hover {
+      @apply(--shadow-elevation-3dp);
+      background: #fff;
+    }
+
+    .header {
+      @apply(--layout-vertical);
+      @apply(--layout-center-center);
+    }
+
+
+    .event-wrapper > .container {
+      padding-top: 20px;
+      max-width: 896px;
+    }
+
+    .event-wrapper > .container:not(.latest-event-wrapper) {
+      padding-bottom: 20px;
+    }
+
+    .event-wrapper {
+      background: #fff;
+    }
+
+    .photo {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      border-radius: 50%;
+      overflow: hidden;
+      background: var(--default-primary-color) 50% 50%;
+      background-size: cover;
+    }
+
+    .card-content {
+      @apply(--layout-vertical);
+      @apply(--layout-flex-auto);
+      color: var(--primary-text-color);
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .name {
+      font-size: 20px;
+    }
+
+    .card-actions {
+      text-align: center;
+    }
+
+    .social-icon {
+      color: var(--secondary-text-color);
+    }
+
+
+    .event {
+      @apply(--layout-vertical);
+      height: var(--grid-item-height);
+      margin: var(--grid-gutter) 0;
+      text-decoration: none;
+    }
+
+    .image {
+      height: 100%;
+      background: no-repeat 50% 50%;
+    }
+
+    .title {
+      @apply(--layout-horizontal);
+      @apply(--layout-center-center);
+      padding: 12px;
+      min-height: 42px;
+      font-size: 20px;
+      text-align: center;
+      letter-spacing: .8px;
+      line-height: 1.05;
+      color: #fff;
+    }
+
+    .share-label {
+      margin-top: 72px;
+      display: block;
+      color: var(--secondary-text-color);
+      text-align: center;
+      text-transform: uppercase;
+      font-size: 14px;
+    }
+
+    button[is=paper-icon-button-light] {
+      margin: 16px;
+      padding: 8px;
+      width: 40px;
+      height: 40px;
+    }
+
+    @media (min-width: 601px) {
+
+      .event {
+        margin: var(--grid-gutter);
+      }
+
+      .details-icon {
+        --iron-icon-height: 72px;
+        --iron-icon-width: 72px;
+        margin-right: 32px;
+      }
+
+      .team-container {
+        @apply(--layout-horizontal);
+        @apply(--layout-center-justified);
+      }
+
+      .member {
+        width: calc(100% / var(--colums-number) - (var(--colums-number) + 1) * var(--grid-gutter));
+        margin: var(--grid-gutter) var(--grid-gutter) calc(var(--colums-number) * var(--grid-gutter));
+      }
+
+      .card {
+        background: none;
+        box-shadow: none;
+        transition: box-shadow 0.28s cubic-bezier(0.4, 0, 0.2, 1), background 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card:hover {
+        @apply(--shadow-elevation-3dp);
+        background: #fff;
+      }
+
+      .social-link {
+        display: inline-block;
+        opacity: 0;
+        transform: translate3d(0, 50%, 0);
+        will-change: transform, opacity;
+        transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .card:hover .social-link {
+        opacity: 1;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .social-link:nth-child(2) {
+        transition-delay: .1s;
+      }
+
+      .social-link:nth-child(3) {
+        transition-delay: .15s;
+      }
+
+      .social-link:nth-child(4) {
+        transition-delay: .2s;
+      }
+
+      .social-link:nth-child(5) {
+        transition-delay: .25s;
+      }
+
+    }
+    @media (min-width: 1600px) {
+      .container {
+        max-width: 960px;
+      }
+    }
+
+  </style>
+
+  <div class="event-wrapper">
+    <div class="container">
+      <marked-element class="event-content" markdown="[[eventBody]]">
+        <div class="markdown-html"></div>
+      </marked-element>
+
+      <span class="share-label">{$ share-with $}</span>
+      <div layout horizontal center-center wrap>
+        <button is="paper-icon-button-light" class="share-button" on-tap="share" share="gplus">
+          <iron-icon icon="gplus"></iron-icon>
+        </button>
+        <button is="paper-icon-button-light" class="share-button" on-tap="share" share="facebook">
+          <iron-icon icon="facebook"></iron-icon>
+        </button>
+        <button is="paper-icon-button-light" class="share-button" on-tap="share" share="twitter">
+          <iron-icon icon="twitter"></iron-icon>
+        </button>
+        <button is="paper-icon-button-light" class="share-button" on-tap="share" share="copy">
+          <iron-icon icon="link"></iron-icon>
+        </button>
+      </div>
+      <template is="dom-repeat" items="[[person]]" as="team" >
+        <div class="team-block">
+          <h3 class="team-name" cascaded>[[team.title]]</h3>
+
+          <div class="team-container">
+            <template is="dom-repeat" items="[[team.members]]" as="member" on-dom-change="updateCascadedNodes">
+              <div class="member">
+                <paper-material class="card"  cascaded>
+                  <div class="header">
+                    <img class="photo" src="[[member.photoUrl]]"/>
+                  </div>
+                  <div class="card-content">
+                    <div class="name">[[member.name]]</div>
+                    <div class="title">[[member.title]]</div>
+                  </div>
+                  <div class="card-actions">
+                    <template is="dom-repeat" items="[[member.socials]]" as="social">
+                      <a class="social-link" href$="[[social.link]]" target="_blank" rel="noopener noreferrer">
+                        <paper-icon-button class="social-icon"
+                        icon$="icons:{{social.icon}}"></paper-icon-button>
+                      </a>
+                    </template>
+                  </div>
+                </paper-material>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+
+    </div>
+    <mapdcamp-block app="{{app}}" selected="{{selected}}" where="{{_location}}" cascaded></mapdcamp-block>
+    <logos-block app="{{app}}" logos="{{logos}}" cascaded></logos-block>
+  </div>
+
+  <footer-block app="{{app}}" cascaded></footer-block>
+
+  <iron-ajax id="ajax" url="[[_eventUrl]]" handle-as="text" last-response="{{eventBody}}"
+  on-response="_eventLoaded"></iron-ajax>
+
+</template>
+
+<script>
+  (function () {
+    'use strict';
+
+    Polymer({
+
+      is: 'event-detail',
+
+      behaviors: [
+      HOVERBOARD.PageBehavior,
+      HOVERBOARD.CascadedBehavior,
+      HOVERBOARD.UtilsBehavior,
+      HOVERBOARD.ShareBehavior
+      ],
+
+      properties: {
+        eventId: {
+          type: String,
+          notify: true
+        },
+
+        events: {
+          type: Array
+        },
+
+        _location:{
+          type: Object
+        },
+
+        _event: {
+          type: Object
+        },
+
+        logos :{
+          type:Array
+        },
+
+        person :{
+          type: Array
+      }
+    },
+
+    observers: [
+    '_eventChanged(events, eventId)'
+    ],
+
+    _eventChanged: function () {
+      if (this.eventId) {
+        var eventIndex = this._getIndexByProperty(this.events, 'id', this.eventId);
+
+        // this._latestPosts[0] = postIndex > 0 ? this.events[eventIndex - 1] : null;
+        // this._latestPosts[1] = postIndex < this.events.length - 1 ? this.events[eventIndex + 1] : null;
+        // this.notifyPath('_latestPosts', this._latestvents.slice());
+
+        this._event = this.events[eventIndex];
+        this.person = this._event.person;
+        this.logos = this._event.logo;
+
+        if(this._event.location == "dcamp"){
+          this._location = this.get('app.data.dcamp-location');
+        }else if(this._event.location == "maru180"){
+          this._location = this.get('app.data.maru-location');
+        }else{
+          this._location = this._event.location;
+        }
+
+        this._updateHeaderSettings();
+        this.notifyPath('_event.date', new Date(this._event.date).toDateString().slice(4));
+        this._eventUrl = '/data/events/' + this._event.date + '-' + this.eventId + '.markdown';
+        this.$.ajax.generateRequest();
+      }
+    },
+
+    _eventLoaded: function () {
+      this.eventId = null;
+      // HOVERBOARD.Analytics.trackEvent('blog', 'open post', this._post.title);
+    },
+
+    _updateHeaderSettings: function () {
+      if (this._event) {
+        this.set('app.headerSettings', {
+          backgroundColor: this._event.primaryColor,
+          backgroundImage: this._event.image,
+          fontColor: '#fff',
+          tabBarColor: '#fff',
+          title: this._event.title,
+          subtitle: new Date(this._event.date).toDateString().slice(4)
+        });
+      }
+    }
+
+  });
+
+}());
+</script>
+
+</dom-module>

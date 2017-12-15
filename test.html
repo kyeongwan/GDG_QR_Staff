@@ -4,7 +4,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?php echo CONF_SITE_TITLE . " > 관리자 메뉴"; ?></title>
+		<title>GDG 참석자 관리메뉴</title>
 		<link type="text/css" rel="stylesheet" href="./assets/css_ext/bootstrap.min.css">
 		<link type="text/css" rel="stylesheet" href="./assets/css_ext/font-awesome.min.css">
 		<link type="text/css" rel="stylesheet" href="./assets/css_ext/dataTables.bootstrap.css">
@@ -17,7 +17,7 @@
 		<script type="text/javascript" src="./assets/js_ext/dataTables.bootstrap.min.js"></script>
 		<script type="text/javascript" src="./assets/js_ext/bootstrap-toggle.min.js"></script>
 		
-		<link type="text/css" rel="stylesheet" href="./assets/css/main.css?<?php echo time();?>">
+		<link type="text/css" rel="stylesheet" href="./assets/css/main.css">
 		
 		
 		<script type="text/javascript">
@@ -25,7 +25,6 @@
 			var list_table;
 			var user_list = [];
 			
-				
 			function setListData(data) {
 				user_list = data;
 				list_table = $('#user_list').DataTable({
@@ -160,6 +159,20 @@
 				<div class="row">
 					<div class="col-lg-12">
 						<h1 class="page-header">참가자 관리</h1>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-lg-4">
+							<input type="text" class="form-control" id="driver_search" placeholder="전화번호 / 기사이름 입력(3자이상)">
+					</div>
+					<div class="col-lg-4">
+							<input type="text" class="form-control" id="driver_search" placeholder="전화번호 / 기사이름 입력(3자이상)">
+					</div>
+					<div class="col-lg-3">
+							<input type="text" class="form-control" id="driver_search" placeholder="API Key">
+					</div>
+					<div class="col-lg-1">
+							<button type="button" style="width: 100%" id="btnSearchDriver" class="btn btn-primary">Apply</button>
 					</div>
 				</div>
 				<div class="row">

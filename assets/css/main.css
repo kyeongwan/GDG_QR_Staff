@@ -14,32 +14,8 @@
 	vertical-align: middle; 
 }
 
-.table > tbody > tr > td.concat {
-	overflow: hidden;
-	max-width: 440px;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
 .row { 
-	margin: 0px; 
-}
-
-.setWidth { 
-	max-width: 100px; 
-}
-
-.concat div { 
-	overflow: hidden; 
-	width: inherit; 
-	white-space: nowrap; 
-	text-overflow: ellipsis; 
-}
-
-.treeview {
-	max-width: 250px;
-	max-height: 630px;
-	overflow: auto;
+	margin: 10px; 
 }
 
 .limit_height_500 {
