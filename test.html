@@ -22,8 +22,12 @@
 		
 		<script type="text/javascript">
 
+			var eventId;
+			var groupName;
+			var apiKey;
 			var list_table;
 			var user_list = [];
+
 			
 			function setListData(data) {
 				user_list = data;
@@ -31,12 +35,24 @@
 					initComplete: function () {
 						var html = "";
 						html += "<label>";
-						html += "<button type='button' class='btn btn-primary' id='allPersonReset'>참석자 초기화</button>";
+						html += "<button type='button' class='btn btn-primary' id='allPersonAbsent'>모든참가자 불참처리</button>";
+						html += "</label>";
+						html += "<label>";
+						html += "<button type='button' class='btn btn-primary' id='allPersonNoShow'>모든참가자 노쇼처리</button>";
 						html += "</label>";
 						$('#user_list_length').html(html);
 
-						$('#allPersonReset').off("click").on('click', function() {
-							allPersonAbsent(null);
+						$('#allPersonAbsent').off("click").on('click', function() {
+							var ret = confirm("모든 참가자를 불참처리 하시겠습니까?");
+							if(ret) {
+								allPersonReset("absent");
+							}
+						});
+						$('#allPersonNoShow').off("click").on('click', function() {
+							var ret = confirm("모든 참가자를 노쇼처리 하시겠습니까?");
+							if(ret) {
+								allPersonReset("noshow");
+							}
 						});
 					},
 					drawCallback: function() {
@@ -95,20 +111,41 @@
 
 				list_table.draw();
 			}
-			$(function() {
+			function initData() {
 				$.ajax({
-	            	url:'./api',
+	            	url:'./api?groupName=' + groupName + '&eventId=' + eventId + '&apiKey=' + apiKey,
 	            	success:function(data){
 	                	console.log(data);
 	                	setListData(data);
-	            	}
-        		});
+	            	},
+	            	error:function(request,status,error){
+        				alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+       				}
+
+        		});				
+			};
+
+			$(document).ready(function() {
+				$("#btnApplyButton").off("click").on("click", function() {
+						eventId = $("#form_event").val();
+						groupName = $("#form_group").val();
+						apiKey = $("#form_api").val();
+
+						if (list_table != null ) {
+							list_table.clear();
+							list_table.destroy();
+						}
+						initData();
+				});
 			});
 	
 			function rsvpPerson(id, result){
 				 var params = new Object();
 				 params.member = id;
 				 params.status = result;
+				 params.eventId = eventId;
+				 params.groupName = groupName;
+				 params.apiKey = apiKey;
 				 console.log(params);
 				 params = JSON.stringify(params);
 				 console.log(params);
@@ -119,12 +156,16 @@
 	            	data: JSON.stringify(params),
 	            	success:function(data){
 	                	console.log(data);
-	                	alert(data);
-	            	}
+	                	alert("처리 되었습니다.");
+	            	},
+	            	error:function(request,status,error){
+	            		console.log(error);
+        				alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+       				}
         		});
 			};
 
-			function allPersonAbsent(){
+			function allPersonReset(status){
 				console.log(user_list);
 				var userIDData = ""
 				for (var i = user_list.length - 1; i >= 0; i--) {
@@ -135,7 +176,10 @@
 				console.log(userIDData);
 				 var params = new Object();
 				 params.member = userIDData;
-				 params.status = "absent";
+				 params.status = status;
+				 params.eventId = eventId;
+				 params.groupName = groupName;
+				 params.apiKey = apiKey;
 				 console.log(params);
 				 params = JSON.stringify(params);
 				 console.log(params);
@@ -146,8 +190,12 @@
 	            	data: JSON.stringify(params),
 	            	success:function(data){
 	                	console.log(data);
-	                	alert(data);
-	            	}
+	                	alert("처리 되었습니다.");
+	            	},
+	            	error:function(request,status,error){
+	            		console.log(error);
+        				alert("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
+       				}
         		});
 			};
 		</script>
@@ -163,16 +211,16 @@
 				</div>
 				<div class="row">
 					<div class="col-lg-4">
-							<input type="text" class="form-control" id="driver_search" placeholder="전화번호 / 기사이름 입력(3자이상)">
+							<input type="text" class="form-control" id="form_group" placeholder="GDG Group 이름">
 					</div>
 					<div class="col-lg-4">
-							<input type="text" class="form-control" id="driver_search" placeholder="전화번호 / 기사이름 입력(3자이상)">
+							<input type="text" class="form-control" id="form_event" placeholder="Event ID">
 					</div>
 					<div class="col-lg-3">
-							<input type="text" class="form-control" id="driver_search" placeholder="API Key">
+							<input type="text" class="form-control" id="form_api" placeholder="API Key">
 					</div>
 					<div class="col-lg-1">
-							<button type="button" style="width: 100%" id="btnSearchDriver" class="btn btn-primary">Apply</button>
+							<button type="button" style="width: 100%" id="btnApplyButton" class="btn btn-primary">Apply</button>
 					</div>
 				</div>
 				<div class="row">
