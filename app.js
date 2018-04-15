@@ -2,7 +2,7 @@ var https = require('https');
 var http = require('http');
 var fs = require('fs');
 var path = require('path');
-var request222 = require('request');
+var meetupRequest = require('request');
 var port = process.env.PORT || 3000; //*
 
 http.createServer(function (request, response) {
@@ -36,35 +36,60 @@ http.createServer(function (request, response) {
                 'Authorization' : 'Bearer ' + filePath.substring(8),
                 'Content-Type' : 'application/json'
             }
-        }, function(response2) {
+        }, function(meetupResponse) {
             var body = "";
-            response2.on('data', function(contents) {
+            meetupResponse.on('data', function(contents) {
                 body += contents;
             });
-            response2.on('end', function() {
-                console.log(response2.statusCode);
+            meetupResponse.on('end', function() {
+                console.log(meetupResponse.statusCode);
                 console.log(JSON.parse(body.toString())); // JSON 파싱을 추가했습니다.
                 access_Token = JSON.parse(body.toString()).id;
-                // var name = JSON.parse(body.toString()).name;
-                // console.log(name);
                 response.writeHead(301,
                   {Location: 'http://lemonlab.co.kr/gdg/qrcode.html?mail='+access_Token} 
                 );
                 response.end();
             });
-
         });
         request.on('error', function(e) {
             console.log("Error!", e.message);
         });
         
         request.end();
-    }else if(filePath.indexOf("./api") == 0) {
+    } else if(filePath.indexOf("./api") == 0) {
 
-        request222.get('http://api.meetup.com/GDG-Seoul/events/248531780/rsvps?key=1f3a1d5fe243405e162550244f3b47&fields=answers,pay_status&response=yes', function (error, response2, body) {
-          console.log('error:', error); // Print the error if one occurred
-          console.log('statusCode:', response2 && response2.statusCode); // Print the response status code if a response was received
+        
+        var param = function(url){
+            let q= url.split('?'),result={};
+            if(q.length>=2){
+                q[1].split('&').forEach((item)=>{
+                   try {
+                     result[item.split('=')[0]]= item.split('=')[1];
+                   } catch (e) {
+                     result[item.split('=')[0]]='';
+                   }
+                })
+            }
+            return result;
+        }
+        var paramMap = param(request.url);
+        console.log(paramMap);
+
+        meetupRequest.get('http://api.meetup.com/' + paramMap['groupName'] +'/events/' + paramMap['eventId'] + '/rsvps?key=' + paramMap['apiKey']+ '&fields=answers,pay_status&response=yes', function (error, response2, body) {
+        console.log('error:', error); //           console.log('statusCode:', response2 && response2.statusCode); // Print the response status code if a response was received
+            // Print the error if one occurred
           // console.log('body:', body); // Print the HTML for the Google homepage.
+
+        
+        var result = new Array();
+        if(response2.statusCode == 401) {
+            var object = new Object();
+            object.code = "auth error";
+            result.push(object);
+            response.writeHead(401, {'Content-Type' : 'application/json; charset=utf-8'});
+            response.end(JSON.stringify(result), 'utf-8');
+            return
+        }
 
           var result = new Array();
           var obj = JSON.parse(body);
@@ -143,9 +168,16 @@ http.createServer(function (request, response) {
             var status = reqObj.status;
             console.log(status);
 
+            var groupName = reqObj.groupName;
+            console.log(status);
+            var eventId = reqObj.eventId;
+            console.log(status);
+            var apiKey = reqObj.apiKey;
+            console.log(status);
+
              
-            request222.post({ 
-                url: 'http://api.meetup.com/GDG-Seoul/events/248531780/attendance?key=1f3a1d5fe243405e162550244f3b47',
+            meetupRequest.post({ 
+                url: 'http://api.meetup.com/' + groupName +'/events/' + eventId + '/attendance?key=' + apiKey,
                 form:    {member : reqObj.member, status: reqObj.status},
                 headers: {
                     'Content-Type' : 'application/x-www-form-urlencoded' 
